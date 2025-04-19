@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Test & Data Sampling</title>
+    <link rel="stylesheet" href="../static/styles.css"> <!-- Link to the external CSS -->
+</head>
+<body>
+    <h1>Sample Data and Test Model</h1>
+
+    <form action="/generate" method="POST">
+        <label for="n_samples">Number of Samples: </label>
+        <input type="number" id="n_samples" name="n_samples" value="100" min="10" max="30000" required><br><br>
+
+        <button id="predict-btn" type="submit">Predict</button>
+    </form>
+
+    <h2>Predictions</h2>
+    <div id="accuracy"></div>
+    <table id="prediction-table">
+        <thead>
+            <tr>
+                <th>Index</th>
+                <th>Label</th>
+                <th>Prediction</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <button id="expand-btn" style="display:none;">... Expand ...</button>
+
+    <script src="../static/script.js"></script> <!-- Link to the external JavaScript -->
+</body>
+</html>
