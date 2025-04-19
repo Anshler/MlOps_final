@@ -4,12 +4,12 @@ from sklearn.metrics import accuracy_score
 from safetensors.torch import load_file
 from models import Model
 
-# Load the model and scaler
+# Load the model and test data
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 model = Model(hidden_layer=512).to(device)
 model.load_state_dict(load_file("best_model.safetensors", device=device))
-model.eval()  # Set to evaluation mode
+model.eval()
 
 test_data = torch.load("test_data.pt")
 x_test_tensor = test_data['X_test'].to(device)
@@ -26,10 +26,10 @@ def index():
     return render_template('index.html')
 
 
-# Route to generate new data and make predictions
+# Route to sample test data and make predictions
 @app.route('/generate', methods=['POST'])
 def generate_and_predict():
-    # Get the form inputs for the synthetic data generation
+    # user input
     n_samples = int(request.form['n_samples'])
 
     indices = torch.randperm(total_samples)[:n_samples]
