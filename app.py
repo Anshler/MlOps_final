@@ -1,4 +1,6 @@
 import torch
+import mlflow.pytorch
+from mlflow.tracking import MlflowClient
 from flask import Flask, render_template, request, jsonify
 from sklearn.metrics import accuracy_score
 from safetensors.torch import load_file
@@ -6,9 +8,32 @@ from models import Model
 
 # Load the model and test data
 device = "cuda" if torch.cuda.is_available() else "cpu"
+model = None
 
-model = Model(hidden_layer=512).to(device)
-model.load_state_dict(load_file("best_model.safetensors", device=device))
+try:
+    MODEL_NAME = "bestModel"
+    client = MlflowClient()
+    production_model_versions = client.get_latest_versions(MODEL_NAME, stages=["Production"])
+
+    if production_model_versions:
+        # Get the most recent production version (latest version with stage 'Production')
+        latest_production_version = production_model_versions[0].version
+        print(f"Latest production model version: {latest_production_version}")
+
+        # Load the model from the model registry
+        model_subpath = "model"
+        model_uri = f"models:/{MODEL_NAME}/{latest_production_version}"
+        model = mlflow.pytorch.load_model(model_uri)
+
+        print("Model loaded successfully from registry")
+    else:
+        raise Exception(f"No production model found for {MODEL_NAME}. Using local backup instead")
+except Exception as e:
+    print(e)
+    model = Model(hidden_layer=512).to(device)
+    model.load_state_dict(load_file("local_prod_backup.safetensors", device=device))
+    print("Backup model loaded successfully")
+
 model.eval()
 
 test_data = torch.load("test_data.pt")
